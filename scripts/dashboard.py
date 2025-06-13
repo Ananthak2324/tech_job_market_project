@@ -6,11 +6,7 @@ import seaborn as sns
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 import os
-import sys
-
-# Add the scripts directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from scripts.train_model import load_data, preprocess_data, create_features, train_model
+from train_model import load_data, preprocess_data, create_features, train_model
 
 # Load environment variables
 load_dotenv()
@@ -157,4 +153,4 @@ def main():
     st.sidebar.dataframe(feature_importance.sort_values('importance', ascending=False))
 
 if __name__ == "__main__":
-    main()
+    main() 
