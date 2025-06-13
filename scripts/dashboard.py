@@ -8,6 +8,13 @@ from dotenv import load_dotenv
 import os
 from train_model import load_data, preprocess_data, create_features, train_model
 
+# Set page config
+st.set_page_config(
+    page_title="Tech Layoffs Dashboard",
+    page_icon="📊",
+    layout="wide"
+)
+
 # Load environment variables
 load_dotenv()
 
@@ -19,15 +26,24 @@ DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 
 # Create database connection
-engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+try:
+    engine = create_engine(f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+except Exception as e:
+    st.error(f"Failed to connect to database: {str(e)}")
+    st.stop()
 
+@st.cache_data(ttl=3600)  # Cache data for 1 hour
 def load_and_prepare_data():
     """Load and prepare data for the dashboard"""
-    df = load_data()
-    monthly_data = preprocess_data(df)
-    feature_data = create_features(monthly_data)
-    model, scaler, _, _ = train_model(feature_data)
-    return df, monthly_data, feature_data, model, scaler
+    try:
+        df = load_data()
+        monthly_data = preprocess_data(df)
+        feature_data = create_features(monthly_data)
+        model, scaler, _, _ = train_model(feature_data)
+        return df, monthly_data, feature_data, model, scaler
+    except Exception as e:
+        st.error(f"Error loading data: {str(e)}")
+        st.stop()
 
 def plot_industry_trends(monthly_data):
     """Plot layoff trends by industry"""
@@ -104,9 +120,19 @@ def show_industry_insights(monthly_data):
 def main():
     st.title("Tech Industry Layoff Analysis Dashboard")
     
+    # Add description
+    st.markdown("""
+    This dashboard provides insights into tech industry layoffs, including trends, predictions, and industry-specific analysis.
+    Use the sidebar filters to customize your view.
+    """)
+    
     # Load data
     with st.spinner('Loading data...'):
-        df, monthly_data, feature_data, model, scaler = load_and_prepare_data()
+        try:
+            df, monthly_data, feature_data, model, scaler = load_and_prepare_data()
+        except Exception as e:
+            st.error(f"Failed to load data: {str(e)}")
+            st.stop()
     
     # Sidebar filters
     st.sidebar.header("Filters")
