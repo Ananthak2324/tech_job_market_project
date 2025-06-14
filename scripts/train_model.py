@@ -26,7 +26,7 @@ def load_data():
     """Load data from PostgreSQL database"""
     query = """
     SELECT 
-        date_layoffs,
+        "Date_layoffs" as date_layoffs,
         company,
         industry,
         country,
@@ -35,7 +35,7 @@ def load_data():
         money_raised_in_$_mil,
         stage
     FROM tech_layoffs
-    WHERE date_layoffs IS NOT NULL
+    WHERE "Date_layoffs" IS NOT NULL
     AND industry IS NOT NULL
     """
     return pd.read_sql(query, engine)
